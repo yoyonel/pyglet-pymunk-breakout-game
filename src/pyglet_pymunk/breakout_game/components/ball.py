@@ -45,8 +45,10 @@ class Ball(pymunk.Body):
         self.on_paddle = False
         self.space.remove(self.joint)
         # random impulsion
-        angle = random.uniform(0 + math.pi/10.0, math.pi - math.pi/10.0)
-        intensity = 0.01
+        angle = random.uniform(0 + math.pi/8.0, math.pi - math.pi/8.0)
+        # intensity of the impulse doesn't not really matter
+        # because with normalize the velocity (of the ball) after ...
+        intensity = 1
         impulse = Vec2d(1, 0).rotated(angle) * intensity
         # http://www.pymunk.org/en/latest/pymunk.html#pymunk.Body.apply_impulse_at_local_point
         self.apply_impulse_at_local_point(impulse)

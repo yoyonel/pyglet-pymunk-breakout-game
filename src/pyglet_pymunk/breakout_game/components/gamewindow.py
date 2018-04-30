@@ -46,9 +46,9 @@ class GameWindow(pyglet.window.Window):
     def on_key_press(self, symbol, modifiers):
         # paddle
         if symbol == key.RIGHT:
-            self.player.velocity = 600, 0
+            self.player.velocity = 500, 0
         if symbol == key.LEFT:
-            self.player.velocity = -600, 0
+            self.player.velocity = -500, 0
 
         # ball
         # ball stick to the paddle (at start/reset)
