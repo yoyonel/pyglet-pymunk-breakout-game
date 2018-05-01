@@ -29,7 +29,7 @@ setup(
     ],
     keywords=[],
     install_requires=[
-        "pyglet==1.2.4",
+        "pyglet==1.3.2",
         "pymunk==5.3.1",    # https://stackoverflow.com/questions/45120438/pymunk-drawing-utils-not-working
     ],
     entry_points={
