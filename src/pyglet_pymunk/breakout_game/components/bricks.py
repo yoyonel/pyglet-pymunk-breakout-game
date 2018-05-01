@@ -31,7 +31,7 @@ class Bricks:
                 # shape
                 # shape = pymunk.Poly.create_box(body, (brick_width, brick_height))
                 shape = pymunk.Segment(body, (0, 0), (100, 0), 8)
-                shape.elasticity = 0.98
+                shape.elasticity = 1.00
                 shape.collision_type = collision_type_for_brick
                 space.add(body, shape)
 

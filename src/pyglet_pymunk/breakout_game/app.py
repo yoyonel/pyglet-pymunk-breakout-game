@@ -6,7 +6,7 @@ import pymunkoptions
 pymunkoptions.options["debug"] = False
 import pyglet
 
-from pyglet_pymunk.breakout_game.components.gamewindow import GameWindow
+from pyglet_pymunk.breakout_game.components.game_window import GameWindow
 
 
 def main():

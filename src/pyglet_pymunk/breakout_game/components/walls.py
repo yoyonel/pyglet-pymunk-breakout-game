@@ -23,9 +23,9 @@ class Walls:
         top = pymunk.Segment(space.static_body, (50, 800), (1230, 800), 2)
         right = pymunk.Segment(space.static_body, (1230, 110), (1230, 800), 2)
 
-        left.elasticity = 0.98
-        right.elasticity = 0.98
-        top.elasticity = 0.98
+        left.elasticity = 1.0
+        right.elasticity = 1.0
+        top.elasticity = 1.0
 
         bottom = pymunk.Segment(space.static_body, (50, 50), (1230, 50), 2)
         bottom.sensor = True

@@ -5,10 +5,12 @@ import math
 import pymunk
 from pymunk.vec2d import Vec2d
 import random
+#
+from pyglet_pymunk.breakout_game.components.collision_types import CollisionType
 
 
 class Ball(pymunk.Body):
-    def __init__(self, space: pymunk.Space, position, collision_type: int):
+    def __init__(self, space: pymunk.Space, position: Vec2d, collision_type: CollisionType):
         """
 
         :param space:
@@ -17,7 +19,7 @@ class Ball(pymunk.Body):
         """
         super().__init__(mass=1, moment=pymunk.inf)
 
-        radius = 15
+        radius = 10
         player_height = 8
 
         offset_y = player_height + radius
@@ -25,7 +27,7 @@ class Ball(pymunk.Body):
         self.position = position.x, position.y + offset_y
 
         shape = pymunk.Circle(self, radius=radius)
-        shape.elasticity = 0.98
+        shape.elasticity = 1.00
         shape.collision_type = collision_type
 
         self.spc = space
@@ -45,7 +47,7 @@ class Ball(pymunk.Body):
         self.on_paddle = False
         self.space.remove(self.joint)
         # random impulsion
-        angle = random.uniform(0 + math.pi/8.0, math.pi - math.pi/8.0)
+        angle = random.uniform(0 + math.pi / 8.0, math.pi - math.pi / 8.0)
         # intensity of the impulse doesn't not really matter
         # because with normalize the velocity (of the ball) after ...
         intensity = 1
@@ -63,4 +65,4 @@ class Ball(pymunk.Body):
         :param dt:
         :return:
         """
-        body.velocity = body.velocity.normalized()*500
+        body.velocity = body.velocity.normalized() * 500

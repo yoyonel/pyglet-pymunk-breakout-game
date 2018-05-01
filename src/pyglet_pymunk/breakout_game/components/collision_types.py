@@ -1,9 +1,16 @@
 """
 
 """
-collision_types = {
-    "ball": 1,
-    "brick": 2,
-    "bottom": 3,
-    "player": 4,
-}
+from enum import Enum, auto, unique
+
+
+@unique
+class CollisionType(int, Enum):
+    """
+
+    """
+    # https://docs.python.org/3/library/enum.html#enum.auto
+    BALL = auto()
+    BRICK = auto()
+    BOTTOM = auto()
+    PLAYER = auto()
