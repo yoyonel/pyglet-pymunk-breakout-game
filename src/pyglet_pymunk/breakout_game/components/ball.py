@@ -4,7 +4,6 @@
 import math
 import pymunk
 from pymunk.vec2d import Vec2d
-import pyglet
 import random
 #
 from pyglet_pymunk.breakout_game.components.collision_types import CollisionType
@@ -36,7 +35,7 @@ class Ball(pymunk.Body):
 
         self.aspect_ratio = aspect_ratio
 
-        self.radius = 20
+        self.radius = 16
 
         paddle_height = 16
         paddle_half_height = paddle_height
@@ -101,10 +100,7 @@ class Ball(pymunk.Body):
         body.velocity = body_velocity_normalized * self.aspect_ratio.scale_s(self.ball_speed)
 
         shapes_filter = pymunk.ShapeFilter(
-            mask=pymunk.ShapeFilter.ALL_MASKS ^ (
-                    2 << CollisionType.BALL |
-                    2 << CollisionType.PLAYER
-            )
+            mask=pymunk.ShapeFilter.ALL_MASKS ^ (2 << CollisionType.BALL)
         )
 
         segment_q = self.space.segment_query_first(

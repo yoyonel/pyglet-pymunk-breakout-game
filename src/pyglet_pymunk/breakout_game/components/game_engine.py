@@ -73,6 +73,7 @@ class GameEngine:
             if len(set_.points) > 0:
                 paddle_shape = arbiter.shapes[0]
                 width = (paddle_shape.b - paddle_shape.a).x
+                # print("width: {}".format(width))
                 delta = (paddle_shape.body.position - set_.points[0].point_a.x).x
                 angle = delta / width / 2
                 # angle = 0.26 if angle > 0 else -0.25
@@ -99,15 +100,17 @@ class GameEngine:
             if contact_shape:
                 # https://github.com/viblo/pymunk/blob/master/examples/using_sprites_pyglet.py
                 pv1 = ball.position
-                # TODO: work for bricks not for walls (left, right, top)
-                pv2 = (Vec2d(contact_shape.bb.left,
-                             contact_shape.bb.top) +
-                       Vec2d(contact_shape.bb.right,
-                             contact_shape.bb.bottom)
-                       ) * 0.5
+                pv2 = ball.segment_q.point
+
+                colors = {
+                    2 << CollisionType.BRICK: (.05, .3, .9),
+                    2 << CollisionType.BOTTOM: (.9, .05, .3),
+                    2 << CollisionType.PLAYER: (.3, .9, .05),
+                }
                 pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
                                      ('v2f', (pv1.x, pv1.y, pv2.x, pv2.y)),
-                                     ('c3f', (.05, .3, .9) * 2)
+                                     ('c3f',
+                                      colors.get(contact_shape.filter.categories, (.9, .9, .9)) * 2)
                                      )
                 batch.draw()
 
