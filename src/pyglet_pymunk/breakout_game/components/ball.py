@@ -10,24 +10,41 @@ from pyglet_pymunk.breakout_game.components.collision_types import CollisionType
 
 
 class Ball(pymunk.Body):
-    def __init__(self, space: pymunk.Space, position: Vec2d, collision_type: CollisionType):
+    def __init__(
+            self,
+            space: pymunk.Space,
+            player_position: Vec2d,
+            collision_type: CollisionType,
+            aspect_ratio,
+            mass=1,
+            player=None,
+    ):
         """
 
         :param space:
-        :param position:
+        :param player_position:
         :param collision_type:
+        :param aspect_ratio:
+        :param mass:
+        :param player:
         """
-        super().__init__(mass=1, moment=pymunk.inf)
+        super().__init__(mass=mass, moment=pymunk.inf)
 
-        radius = 10
-        player_height = 8
+        self.aspect_ratio = aspect_ratio
 
-        offset_y = player_height + radius
+        radius = 20
 
-        self.position = position.x, position.y + offset_y
+        player_height = 16
+        player_half_height = player_height
 
-        shape = pymunk.Circle(self, radius=radius)
-        shape.elasticity = 1.00
+        ball_position = Vec2d(
+            player_position.x,
+            player_position.y + aspect_ratio.scale_s(player_half_height + radius)
+        )
+        self.position = ball_position
+
+        shape = pymunk.Circle(self, radius=aspect_ratio.scale_s(radius))
+        shape.elasticity = 0.98
         shape.collision_type = collision_type
 
         self.spc = space
@@ -35,9 +52,16 @@ class Ball(pymunk.Body):
 
         self.velocity_func = self.constant_velocity
 
-        self.joint = pymunk.GrooveJoint(space.static_body, self, (100, 100 + offset_y), (1180, 100 + offset_y), (0, 0))
-
+        self.joint = pymunk.GrooveJoint(
+            space.static_body,
+            self,
+            Vec2d(player.joint_groove_a.x, ball_position.y),
+            Vec2d(player.joint_groove_b.x, ball_position.y),
+            Vec2d(0, 0),
+        )
         space.add(self, shape, self.joint)
+
+        self.ball_speed = 500
 
     def shoot(self):
         """
@@ -65,4 +89,4 @@ class Ball(pymunk.Body):
         :param dt:
         :return:
         """
-        body.velocity = body.velocity.normalized() * 500
+        body.velocity = body.velocity.normalized() * self.aspect_ratio.scale_s(self.ball_speed)

@@ -18,14 +18,14 @@ class GameWindow(pyglet.window.Window):
     """
 
     """
-    def __init__(self, *args, **kwargs):
+    def __init__(self, aspect_ratio, *args, **kwargs):
         super().__init__(*args, **kwargs)
         # set window location
-        self.set_location(300, 50)
+        position = aspect_ratio.scale(300, 50)
+        self.set_location(position.x, position.y)
         # framerate display
         self.fps = FPSDisplay(self)
-
-        self.engine = GameEngine()
+        self.engine = GameEngine(aspect_ratio)
 
     def on_draw(self):
         self.clear()

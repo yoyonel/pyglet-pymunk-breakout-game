@@ -24,18 +24,32 @@ class GameEngine:
 
     """
 
-    def __init__(self):
+    def __init__(self, aspect_ratio):
+        self.aspect_ratio = aspect_ratio
+
         self.space = pymunk.Space()
         self.options = DrawOptions()
 
         self._init_dynamic_body()
         #
-        self.walls = Walls(self.space, CollisionType.BALL, CollisionType.BOTTOM, self.reset_game)
-        self.bricks = Bricks(self.space, CollisionType.BRICK, CollisionType.BALL)
+        self.walls = Walls(self.space, CollisionType.BALL, CollisionType.BOTTOM, self.reset_game, aspect_ratio)
+        self.bricks = Bricks(self.space, CollisionType.BRICK, CollisionType.BALL, aspect_ratio)
 
     def _init_dynamic_body(self):
-        self.player = Player(self.space, CollisionType.PLAYER)
-        self.ball = Ball(self.space, self.player.position, CollisionType.BALL)
+        self.player = Player(
+            self.space,
+            CollisionType.PLAYER,
+            self.aspect_ratio,
+            mass=100
+        )
+        self.ball = Ball(
+            self.space,
+            self.player.position,
+            CollisionType.BALL,
+            self.aspect_ratio,
+            mass=1.0,
+            player=self.player
+        )
 
     def on_draw(self):
         self.space.debug_draw(self.options)
@@ -58,9 +72,9 @@ class GameEngine:
 
             # paddle
             if command == ActionCommand.MOVE_RIGHT:
-                velocity = 500, 0
+                velocity = self.aspect_ratio.scale(500, 0)
             if command == ActionCommand.MOVE_LEFT:
-                velocity = -500, 0
+                velocity = self.aspect_ratio.scale(-500, 0)
             if command == ActionCommand.SHOOT:
                 if self.ball.on_paddle:
                     self.ball.shoot()

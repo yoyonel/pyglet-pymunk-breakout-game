@@ -5,33 +5,41 @@ import pymunk
 
 
 class Bricks:
-    def __init__(self, space: pymunk.Space, collision_type_for_brick, collision_type_for_ball):
+    def __init__(self, space: pymunk.Space, collision_type_for_brick, collision_type_for_ball, aspect_ratio):
         """
 
         :param space:
         :param collision_type_for_brick:
         """
-        brick_width = 100
-        brick_height = 16
+        grid_position = aspect_ratio.scale(90, 500)
 
-        x_space_between_brick = 10
+        brick_size = aspect_ratio.scale(100, 16)
+        brick_width = brick_size.x
+        brick_height = brick_size.y
+
+        space_between_brick = aspect_ratio.scale(10, 14)
+        x_space_between_brick = space_between_brick.x
         brick_step_x = brick_width + x_space_between_brick
 
-        y_space_between_brick = 14
+        y_space_between_brick = space_between_brick.y
         brick_step_y = brick_height + y_space_between_brick
 
         for x in range(10):
-            pos_x = x*brick_step_x + 90
+            pos_x = grid_position.x + x*brick_step_x
             for y in range(10):
-                pos_y = y*brick_step_y + 500
+                pos_y = grid_position.y + y*brick_step_y
                 # http://www.pymunk.org/en/latest/pymunk.html#pymunk.Body.__init__
                 body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
                 # position
                 body.position = pos_x, pos_y
                 # shape
-                # shape = pymunk.Poly.create_box(body, (brick_width, brick_height))
-                shape = pymunk.Segment(body, (0, 0), (100, 0), 8)
-                shape.elasticity = 1.00
+                shape = pymunk.Segment(
+                    body,
+                    (0, 0),
+                    aspect_ratio.scale(100, 0),
+                    8
+                )
+                shape.elasticity = 0.98
                 shape.collision_type = collision_type_for_brick
                 space.add(body, shape)
 

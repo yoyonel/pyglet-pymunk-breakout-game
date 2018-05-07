@@ -10,6 +10,7 @@ class Walls:
             collision_type_for_ball,
             collision_type_for_bottom,
             cb_reset_game,
+            aspect_ratio
     ):
         """
 
@@ -19,15 +20,35 @@ class Walls:
         :param cb_reset_game: call back function to reset game
         """
 
-        left = pymunk.Segment(space.static_body, (50, 110), (50, 800), 2)
-        top = pymunk.Segment(space.static_body, (50, 800), (1230, 800), 2)
-        right = pymunk.Segment(space.static_body, (1230, 110), (1230, 800), 2)
+        left = pymunk.Segment(
+            space.static_body,
+            aspect_ratio.scale(50, 50),
+            aspect_ratio.scale(50, 800),
+            2
+        )
+        top = pymunk.Segment(
+            space.static_body,
+            aspect_ratio.scale(50, 800),
+            aspect_ratio.scale(1230, 800),
+            2
+        )
+        right = pymunk.Segment(
+            space.static_body,
+            aspect_ratio.scale(1230, 50),
+            aspect_ratio.scale(1230, 800),
+            2
+        )
 
         left.elasticity = 1.0
         right.elasticity = 1.0
         top.elasticity = 1.0
 
-        bottom = pymunk.Segment(space.static_body, (50, 50), (1230, 50), 2)
+        bottom = pymunk.Segment(
+            space.static_body,
+            aspect_ratio.scale(50, 50),
+            aspect_ratio.scale(1230, 50),
+            2
+        )
         bottom.sensor = True
         bottom.collision_type = collision_type_for_bottom
 
