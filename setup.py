@@ -31,6 +31,7 @@ setup(
     install_requires=[
         "pyglet==1.3.2",
         "pymunk==5.3.1",    # https://stackoverflow.com/questions/45120438/pymunk-drawing-utils-not-working
+        # "pygame",
     ],
     entry_points={
         'console_scripts': [

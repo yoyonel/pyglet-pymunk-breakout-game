@@ -59,7 +59,7 @@ class Bricks:
         grid_left_corner = aspect_ratio.scale(wall_left + 40, 500)
         grid_right_corner = aspect_ratio.scale(wall_right - 40, 500 + (16+14)*10)
 
-        nb_bricks = Vec2d(8, 4)
+        nb_bricks = Vec2d(12, 8)
 
         spaces_between_brick = aspect_ratio.scale_V2d(Vec2d(10, 14))
 
@@ -73,20 +73,18 @@ class Bricks:
             pos_x = grid_left_corner.x + x * brick_steps.x
             for y in range(nb_bricks.y):
                 pos_y = grid_left_corner.y + y * brick_steps.y
+
+                # https://github.com/viblo/pymunk/blob/master/examples/breakout.py
                 # http://www.pymunk.org/en/latest/pymunk.html#pymunk.Body.__init__
-                body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
+                brick_body = pymunk.Body(body_type=pymunk.Body.KINEMATIC)
                 # position
-                body.position = pos_x, pos_y
-                # shape
-                shape = pymunk.Segment(
-                    body,
-                    (0, 0),
-                    Vec2d(brick_size.x, 0),
-                    brick_size.y / 2.0,
-                )
-                shape.elasticity = 0.98
-                shape.collision_type = collision_type_for_brick
-                space.add(body, shape)
+                brick_body.position = Vec2d(pos_x, pos_y) + brick_size * 0.5
+
+                brick_shape = pymunk.Poly.create_box(brick_body, brick_size)
+
+                brick_shape.elasticity = 0.98
+                brick_shape.collision_type = collision_type_for_brick
+                space.add(brick_body, brick_shape)
 
         handler = space.add_collision_handler(collision_type_for_brick, collision_type_for_ball)
         # http://www.pymunk.org/en/latest/pymunk.html#pymunk.CollisionHandler.separate
