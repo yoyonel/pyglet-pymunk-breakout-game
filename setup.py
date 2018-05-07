@@ -30,7 +30,8 @@ setup(
     keywords=[],
     install_requires=[
         "pyglet==1.3.2",
-        "pymunk==5.3.1",    # https://stackoverflow.com/questions/45120438/pymunk-drawing-utils-not-working
+        "pymunk==5.3.2",    # https://stackoverflow.com/questions/45120438/pymunk-drawing-utils-not-working
+                            # https://github.com/viblo/pymunk/issues/122
         # "pygame",
     ],
     entry_points={

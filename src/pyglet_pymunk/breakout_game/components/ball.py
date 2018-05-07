@@ -4,48 +4,53 @@
 import math
 import pymunk
 from pymunk.vec2d import Vec2d
+import pyglet
 import random
 #
 from pyglet_pymunk.breakout_game.components.collision_types import CollisionType
+from pyglet_pymunk.breakout_game.components.paddle import Paddle
+#
+from pyglet_pymunk.breakout_game.components.aspect_ratio import AspectRatio
 
 
 class Ball(pymunk.Body):
     def __init__(
             self,
             space: pymunk.Space,
-            player_position: Vec2d,
+            paddle_position: Vec2d,
             collision_type: CollisionType,
-            aspect_ratio,
-            mass=1,
-            player=None,
+            aspect_ratio: AspectRatio,
+            mass: float=1,
+            paddle: Paddle=None,
     ):
         """
 
         :param space:
-        :param player_position:
+        :param paddle_position:
         :param collision_type:
         :param aspect_ratio:
         :param mass:
-        :param player:
+        :param paddle:
         """
         super().__init__(mass=mass, moment=pymunk.inf)
 
         self.aspect_ratio = aspect_ratio
 
-        radius = 20
+        self.radius = 20
 
-        player_height = 16
-        player_half_height = player_height
+        paddle_height = 16
+        paddle_half_height = paddle_height
 
         ball_position = Vec2d(
-            player_position.x,
-            player_position.y + aspect_ratio.scale_s(player_half_height + radius)
+            paddle_position.x,
+            paddle_position.y + aspect_ratio.scale_s(paddle_half_height + self.radius)
         )
         self.position = ball_position
 
-        shape = pymunk.Circle(self, radius=aspect_ratio.scale_s(radius))
+        shape = pymunk.Circle(self, radius=aspect_ratio.scale_s(self.radius))
         shape.elasticity = 0.98
         shape.collision_type = collision_type
+        shape.filter = pymunk.ShapeFilter(categories=2 << collision_type)
 
         self.spc = space
         self.on_paddle = True
@@ -55,13 +60,15 @@ class Ball(pymunk.Body):
         self.joint = pymunk.GrooveJoint(
             space.static_body,
             self,
-            Vec2d(player.joint_groove_a.x, ball_position.y),
-            Vec2d(player.joint_groove_b.x, ball_position.y),
+            Vec2d(paddle.groove_joint.groove_a.x, ball_position.y),
+            Vec2d(paddle.groove_joint.groove_b.x, ball_position.y),
             Vec2d(0, 0),
         )
         space.add(self, shape, self.joint)
 
         self.ball_speed = 500
+
+        self.segment_q = None
 
     def shoot(self):
         """
@@ -89,4 +96,21 @@ class Ball(pymunk.Body):
         :param dt:
         :return:
         """
-        body.velocity = body.velocity.normalized() * self.aspect_ratio.scale_s(self.ball_speed)
+        body_velocity_normalized = body.velocity.normalized()
+
+        body.velocity = body_velocity_normalized * self.aspect_ratio.scale_s(self.ball_speed)
+
+        shapes_filter = pymunk.ShapeFilter(
+            mask=pymunk.ShapeFilter.ALL_MASKS ^ (
+                    2 << CollisionType.BALL |
+                    2 << CollisionType.PLAYER
+            )
+        )
+
+        segment_q = self.space.segment_query_first(
+            body.position,
+            body.position + body_velocity_normalized * 10000,
+            self.radius,
+            shapes_filter,
+        )
+        self.segment_q = segment_q

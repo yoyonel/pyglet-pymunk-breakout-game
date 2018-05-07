@@ -6,27 +6,8 @@ pymunkoptions.options["debug"] = False
 import pyglet
 from pymunk.vec2d import Vec2d
 #
+from pyglet_pymunk.breakout_game.components.aspect_ratio import AspectRatio
 from pyglet_pymunk.breakout_game.components.game_window import GameWindow
-
-
-class AspectRatio:
-    def __init__(self, src_sizes: Vec2d, dst_sizes: Vec2d):
-        self.aspect_ratio = Vec2d(
-            dst_sizes[0] / src_sizes[0],
-            dst_sizes[1] / src_sizes[1],
-        )   # type: Vec2d
-
-    def scale(self, x, y) -> Vec2d:
-        return Vec2d(
-            int(x * self.aspect_ratio[0]),
-            int(y * self.aspect_ratio[1]),
-        )
-
-    def scale_V2d(self, v: Vec2d) -> Vec2d:
-        return self.scale(v.x, v.y)
-
-    def scale_s(self, scalar: float) -> float:
-        return self.scale(scalar, 0).x
 
 
 def main():

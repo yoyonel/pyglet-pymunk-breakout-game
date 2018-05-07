@@ -84,6 +84,7 @@ class Bricks:
 
                 brick_shape.elasticity = 0.98
                 brick_shape.collision_type = collision_type_for_brick
+                brick_shape.filter = pymunk.ShapeFilter(categories=2 << collision_type_for_brick)
                 space.add(brick_body, brick_shape)
 
         handler = space.add_collision_handler(collision_type_for_brick, collision_type_for_ball)

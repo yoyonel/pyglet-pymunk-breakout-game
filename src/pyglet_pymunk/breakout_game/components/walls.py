@@ -52,6 +52,11 @@ class Walls:
         bottom.sensor = True
         bottom.collision_type = collision_type_for_bottom
 
+        left.filter = pymunk.ShapeFilter(categories=2 << collision_type_for_bottom)
+        right.filter = pymunk.ShapeFilter(categories=2 << collision_type_for_bottom)
+        top.filter = pymunk.ShapeFilter(categories=2 << collision_type_for_bottom)
+        bottom.filter = pymunk.ShapeFilter(categories=2 << collision_type_for_bottom)
+
         # http://www.pymunk.org/en/latest/pymunk.html#pymunk.CollisionHandler
         handler = space.add_collision_handler(collision_type_for_ball, collision_type_for_bottom)
         handler.begin = self.reset_game
