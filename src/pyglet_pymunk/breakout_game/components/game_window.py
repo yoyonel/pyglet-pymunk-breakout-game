@@ -11,6 +11,7 @@ map_key_command = {
         key.LEFT: ActionCommand.MOVE_LEFT,
         key.SPACE: ActionCommand.SHOOT,
         key.R: ActionCommand.RESET_GAME,
+        key.P: ActionCommand.PAUSE_GAME,
     }
 
 
@@ -18,14 +19,19 @@ class GameWindow(pyglet.window.Window):
     """
 
     """
-    def __init__(self, aspect_ratio, *args, **kwargs):
+    def __init__(
+            self,
+            aspect_ratio,
+            dt_for_physicx,
+            *args, **kwargs
+    ):
         super().__init__(*args, **kwargs)
         # set window location
         position = aspect_ratio.scale(300, 50)
         self.set_location(position.x, position.y)
         # framerate display
         self.fps = FPSDisplay(self)
-        self.engine = GameEngine(aspect_ratio)
+        self.engine = GameEngine(aspect_ratio, dt_for_physicx)
 
     def on_draw(self):
         self.clear()

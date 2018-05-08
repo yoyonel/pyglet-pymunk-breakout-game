@@ -9,7 +9,7 @@ class Walls:
             self, space: pymunk.Space,
             collision_type_for_ball,
             collision_type_for_bottom,
-            cb_reset_game,
+            cb_loose_ball,
             aspect_ratio
     ):
         """
@@ -17,7 +17,7 @@ class Walls:
         :param space:
         :param collision_type_for_ball:
         :param collision_type_for_bottom:
-        :param cb_reset_game: call back function to reset game
+        :param cb_loose_ball: call back function to reset game
         """
 
         left = pymunk.Segment(
@@ -60,7 +60,7 @@ class Walls:
         # http://www.pymunk.org/en/latest/pymunk.html#pymunk.CollisionHandler
         handler = space.add_collision_handler(collision_type_for_ball, collision_type_for_bottom)
         handler.begin = self.reset_game
-        self.cb_reset_game = cb_reset_game
+        self.cb_loose_ball = cb_loose_ball
 
         space.add(left, top, right, bottom)
 
@@ -73,5 +73,5 @@ class Walls:
         :param data:
         :return:
         """
-        self.cb_reset_game()
+        self.cb_loose_ball(self)
         return True

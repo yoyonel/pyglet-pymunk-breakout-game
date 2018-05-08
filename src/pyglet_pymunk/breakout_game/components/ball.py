@@ -35,7 +35,7 @@ class Ball(pymunk.Body):
 
         self.aspect_ratio = aspect_ratio
 
-        self.radius = 16
+        self.radius = 16 * 1
 
         paddle_height = 16
         paddle_half_height = paddle_height
@@ -67,7 +67,8 @@ class Ball(pymunk.Body):
 
         self.ball_speed = 500
 
-        self.segment_q = None
+        self.segments_q = []
+        self.points_on_ball = []
 
     def shoot(self):
         """
@@ -80,7 +81,7 @@ class Ball(pymunk.Body):
         angle = random.uniform(0 + math.pi / 8.0, math.pi - math.pi / 8.0)
         # intensity of the impulse doesn't not really matter
         # because with normalize the velocity (of the ball) after ...
-        intensity = 1
+        intensity = 500
         impulse = Vec2d(1, 0).rotated(angle) * intensity
         # http://www.pymunk.org/en/latest/pymunk.html#pymunk.Body.apply_impulse_at_local_point
         self.apply_impulse_at_local_point(impulse)
@@ -96,17 +97,46 @@ class Ball(pymunk.Body):
         :return:
         """
         body_velocity_normalized = body.velocity.normalized()
-
+        #
         body.velocity = body_velocity_normalized * self.aspect_ratio.scale_s(self.ball_speed)
 
+        self.raycast_ball_over_the_world(body.position, body_velocity_normalized)
+
+    def raycast_ball_over_the_world(
+            self,
+            ball_position,
+            ball_velocity_normalized
+    ):
         shapes_filter = pymunk.ShapeFilter(
+            # mask=pymunk.ShapeFilter.ALL_MASKS
             mask=pymunk.ShapeFilter.ALL_MASKS ^ (2 << CollisionType.BALL)
         )
 
-        segment_q = self.space.segment_query_first(
-            body.position,
-            body.position + body_velocity_normalized * 10000,
-            self.radius,
-            shapes_filter,
-        )
-        self.segment_q = segment_q
+        body_velocity_normalized_ortho = ball_velocity_normalized.rotated(+math.pi / 2.0)
+
+        ball_radius_scaled = self.aspect_ratio.scale_s(self.radius * 1.00)
+
+        self.points_on_ball = [
+            ball_position + body_velocity_normalized_ortho * ball_radius_scaled,
+            ball_position - body_velocity_normalized_ortho * ball_radius_scaled,
+            ball_position + ball_velocity_normalized * ball_radius_scaled
+        ]
+
+        wall_left = 50
+        wall_right = 1230
+        wall_top = 800
+        wall_bottom = 50
+        raycast_distance = self.aspect_ratio.scale(
+            wall_right - wall_left,
+            wall_top - wall_bottom
+        ).length
+
+        self.segments_q = [
+            self.space.segment_query_first(
+                point_on_ball,
+                point_on_ball + ball_velocity_normalized * raycast_distance,
+                1,
+                shapes_filter,
+            )
+            for point_on_ball in self.points_on_ball
+        ]

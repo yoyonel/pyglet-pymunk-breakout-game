@@ -53,11 +53,12 @@ class Bricks:
         handler.separate = self._cb_remove_brick
 
     def build_dynamic_grid(self, space: pymunk.Space, collision_type_for_brick, collision_type_for_ball, aspect_ratio):
+
         wall_left = 50
         wall_right = 1230
 
         grid_left_corner = aspect_ratio.scale(wall_left + 40, 500)
-        grid_right_corner = aspect_ratio.scale(wall_right - 40, 500 + (16+14)*10)
+        grid_right_corner = aspect_ratio.scale(wall_right - 40, 500 + (16+14)*10 - 40)
 
         nb_bricks = Vec2d(12, 8)
 

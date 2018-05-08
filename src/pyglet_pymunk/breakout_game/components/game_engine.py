@@ -22,6 +22,7 @@ class ActionCommand(Enum):
     MOVE_RIGHT = auto()
     SHOOT = auto()
     RESET_GAME = auto()
+    PAUSE_GAME = auto()
 
 
 class GameEngine:
@@ -29,22 +30,24 @@ class GameEngine:
 
     """
 
-    def __init__(self, aspect_ratio):
+    def __init__(self, aspect_ratio, dt_for_physicx):
         self.aspect_ratio = aspect_ratio
+        self.dt_for_physicx = dt_for_physicx
 
         self.space = pymunk.Space()
         self.options = DrawOptions()
 
-        self.nb_balls = 1
+        self.nb_balls = 2
+        self.nb_balls_in_game = self.nb_balls
 
         self._init_dynamic_body()
         self._add_collision_handler_for_paddle_ball()
         #
-        self.walls = Walls(self.space, CollisionType.BALL, CollisionType.BOTTOM, self.reset_game, aspect_ratio)
+        self.walls = Walls(self.space, CollisionType.BALL, CollisionType.BOTTOM, self.loose_ball, aspect_ratio)
         self.bricks = Bricks(self.space, CollisionType.BRICK, CollisionType.BALL, aspect_ratio)
 
     def _init_dynamic_body(self):
-        self.player = Paddle(
+        self.paddle = Paddle(
             self.space,
             CollisionType.PLAYER,
             self.aspect_ratio,
@@ -54,14 +57,15 @@ class GameEngine:
         self.balls = [
             Ball(
                 self.space,
-                self.player.position,
+                self.paddle.position,
                 CollisionType.BALL,
                 self.aspect_ratio,
                 mass=1.0,
-                paddle=self.player
+                paddle=self.paddle
             )
             for _ in range(self.nb_balls)
         ]
+        self.nb_balls_in_game = len(self.balls)
 
     def _add_collision_handler_for_paddle_ball(self):
         #
@@ -93,29 +97,32 @@ class GameEngine:
     def on_draw(self):
         self.space.debug_draw(self.options)
 
-        ball = self.balls[0]
-        segment_q = ball.segment_q
-        if segment_q:
-            contact_shape = ball.segment_q.shape
-            if contact_shape:
-                # https://github.com/viblo/pymunk/blob/master/examples/using_sprites_pyglet.py
-                pv1 = ball.position
-                pv2 = ball.segment_q.point
+        def draw_segment_q(segment_q, point_on_ball):
+            if segment_q:
+                contact_shape = segment_q.shape
+                if contact_shape:
+                    # https://github.com/viblo/pymunk/blob/master/examples/using_sprites_pyglet.py
+                    pv1 = point_on_ball
+                    pv2 = segment_q.point
 
-                colors = {
-                    2 << CollisionType.BRICK: (.05, .3, .9),
-                    2 << CollisionType.BOTTOM: (.9, .05, .3),
-                    2 << CollisionType.PLAYER: (.3, .9, .05),
-                }
-                pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
-                                     ('v2f', (pv1.x, pv1.y, pv2.x, pv2.y)),
-                                     ('c3f',
-                                      colors.get(contact_shape.filter.categories, (.9, .9, .9)) * 2)
-                                     )
-                batch.draw()
+                    colors = {
+                        2 << CollisionType.BRICK: (.05, .3, .9),
+                        2 << CollisionType.BOTTOM: (.9, .05, .3),
+                        2 << CollisionType.PLAYER: (.3, .9, .05),
+                    }
+                    pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                                         ('v2f', (pv1.x, pv1.y, pv2.x, pv2.y)),
+                                         ('c3f',
+                                          colors.get(contact_shape.filter.categories, (.9, .9, .9)) * 2)
+                                         )
+                    batch.draw()
+
+        for ball in self.balls:
+            for segment_q, point_on_ball in zip(ball.segments_q, ball.points_on_ball):
+                draw_segment_q(segment_q, point_on_ball)
 
     def update_velocity(self, velocity):
-        self.player.velocity = velocity
+        self.paddle.velocity = velocity
         for ball in self.balls:
             if ball.on_paddle:
                 ball.velocity = velocity
@@ -128,6 +135,8 @@ class GameEngine:
         """
         if command == ActionCommand.RESET_GAME:
             self.reset_game()
+        elif command == ActionCommand.PAUSE_GAME:
+            self.dt_for_physicx = 0.0
         else:
             velocity = None
 
@@ -147,6 +156,13 @@ class GameEngine:
     def on_action_command_release(self, command: ActionCommand):
         if command in (ActionCommand.MOVE_RIGHT, ActionCommand.MOVE_LEFT):
             self.update_velocity((0, 0))
+        elif command == ActionCommand.PAUSE_GAME:
+            self.dt_for_physicx = 1.0 / 50.0
+
+    def loose_ball(self, ball):
+        self.nb_balls_in_game -= 1
+        if self.nb_balls_in_game == 0:
+            self.reset_game()
 
     def reset_game(self):
         # remove ball, player
@@ -167,4 +183,4 @@ class GameEngine:
         :param dt:
         :return:
         """
-        self.space.step(1 / 50.0)
+        self.space.step(self.dt_for_physicx)

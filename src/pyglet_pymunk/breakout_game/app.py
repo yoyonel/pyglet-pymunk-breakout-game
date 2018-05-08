@@ -14,11 +14,12 @@ def main():
     original_size = Vec2d(1280, 900)
     target_size = Vec2d(800, 600)
     aspect_ratio = AspectRatio(original_size, target_size)
+    dt_for_physicx = 1 / 50.0
 
     window_size = aspect_ratio.scale_V2d(original_size)
-    window = GameWindow(aspect_ratio, window_size[0], window_size[1], 'Breakout game', resizable=False)
+    window = GameWindow(aspect_ratio, dt_for_physicx,
+                        window_size[0], window_size[1], 'Breakout game', resizable=False)
 
-    dt_for_physicx = 1 / 50.0
     pyglet.clock.schedule_interval(window.update, dt_for_physicx)
 
     pyglet.app.run()

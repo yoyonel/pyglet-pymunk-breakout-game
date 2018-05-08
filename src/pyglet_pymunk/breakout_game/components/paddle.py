@@ -53,6 +53,8 @@ class Paddle(pymunk.Body):
             aspect_ratio.scale(+paddle_half_width, 0),
             aspect_ratio.scale_s(paddle_half_height)
         )
+        # Don't work with custom pre_solve collision handler (this solver suppose a segment and not
+        # a polygonal shape). Need to fix that !
         # shape = pymunk.Poly.create_box(self, (paddle_width, paddle_height))
 
         shape.elasticity = 1.00
