@@ -25,3 +25,16 @@ class AspectRatio:
 
     def scale_s(self, scalar: float) -> float:
         return self.scale(scalar, 0).x
+
+
+class DtRatio:
+    """
+
+    """
+    def __init__(self, dt_for_display: float, dt_for_physicx: float):
+        self.dt_for_display = dt_for_display
+        self.dt_for_physicx = dt_for_physicx
+        self.dt_ratio = dt_for_physicx / dt_for_display
+
+    def scale(self, dt) -> float:
+        return dt * self.dt_ratio

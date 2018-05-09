@@ -35,7 +35,7 @@ class Ball(pymunk.Body):
 
         self.aspect_ratio = aspect_ratio
 
-        self.radius = 16 * 1
+        self.radius = 16
 
         paddle_height = 16
         paddle_half_height = paddle_height
@@ -100,12 +100,19 @@ class Ball(pymunk.Body):
         #
         body.velocity = body_velocity_normalized * self.aspect_ratio.scale_s(self.ball_speed)
 
-        self.raycast_ball_over_the_world(body.position, body_velocity_normalized)
+        dp = dt*body.velocity
+
+        self.raycast_ball_over_the_world(
+            body.position,
+            body_velocity_normalized,
+            dp
+        )
 
     def raycast_ball_over_the_world(
             self,
             ball_position,
-            ball_velocity_normalized
+            ball_velocity_normalized,
+            dp
     ):
         shapes_filter = pymunk.ShapeFilter(
             # mask=pymunk.ShapeFilter.ALL_MASKS

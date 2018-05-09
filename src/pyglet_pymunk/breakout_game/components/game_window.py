@@ -32,6 +32,8 @@ class GameWindow(pyglet.window.Window):
         # framerate display
         self.fps = FPSDisplay(self)
         self.engine = GameEngine(aspect_ratio, dt_for_physicx)
+        self.dt_for_physicx = dt_for_physicx
+        self.remain_time_for_updating_physicx = dt_for_physicx
 
     def on_draw(self):
         self.clear()
@@ -56,8 +58,14 @@ class GameWindow(pyglet.window.Window):
 
         :param dt:
         :return:
+
         """
-        self.engine.update(dt)
+        # dt: deltatime from display
+        self.remain_time_for_updating_physicx -= dt
+
+        while self.remain_time_for_updating_physicx < 0.0:
+            self.engine.update(self.dt_for_physicx)
+            self.remain_time_for_updating_physicx += self.dt_for_physicx
 
     def quit_game(self):
         # http://nullege.com/codes/search/pyglet.app.exit

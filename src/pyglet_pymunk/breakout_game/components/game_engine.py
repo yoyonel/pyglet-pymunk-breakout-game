@@ -97,29 +97,30 @@ class GameEngine:
     def on_draw(self):
         self.space.debug_draw(self.options)
 
-        def draw_segment_q(segment_q, point_on_ball):
-            if segment_q:
-                contact_shape = segment_q.shape
-                if contact_shape:
-                    # https://github.com/viblo/pymunk/blob/master/examples/using_sprites_pyglet.py
-                    pv1 = point_on_ball
-                    pv2 = segment_q.point
-
-                    colors = {
-                        2 << CollisionType.BRICK: (.05, .3, .9),
-                        2 << CollisionType.BOTTOM: (.9, .05, .3),
-                        2 << CollisionType.PLAYER: (.3, .9, .05),
-                    }
-                    pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
-                                         ('v2f', (pv1.x, pv1.y, pv2.x, pv2.y)),
-                                         ('c3f',
-                                          colors.get(contact_shape.filter.categories, (.9, .9, .9)) * 2)
-                                         )
-                    batch.draw()
-
         for ball in self.balls:
             for segment_q, point_on_ball in zip(ball.segments_q, ball.points_on_ball):
-                draw_segment_q(segment_q, point_on_ball)
+                self._draw_segment_q(segment_q, point_on_ball)
+
+    @staticmethod
+    def _draw_segment_q(segment_q, point_on_ball):
+        if segment_q:
+            contact_shape = segment_q.shape
+            if contact_shape:
+                # https://github.com/viblo/pymunk/blob/master/examples/using_sprites_pyglet.py
+                pv1 = point_on_ball
+                pv2 = segment_q.point
+
+                colors = {
+                    2 << CollisionType.BRICK: (.05, .3, .9),
+                    2 << CollisionType.BOTTOM: (.9, .05, .3),
+                    2 << CollisionType.PLAYER: (.3, .9, .05),
+                }
+                pyglet.graphics.draw(2, pyglet.gl.GL_LINES,
+                                     ('v2f', (pv1.x, pv1.y, pv2.x, pv2.y)),
+                                     ('c3f',
+                                      colors.get(contact_shape.filter.categories, (.9, .9, .9)) * 2)
+                                     )
+                batch.draw()
 
     def update_velocity(self, velocity):
         self.paddle.velocity = velocity
@@ -183,4 +184,26 @@ class GameEngine:
         :param dt:
         :return:
         """
-        self.space.step(self.dt_for_physicx)
+        dt_for_physicx = self.dt_for_physicx
+        # dt_for_physicx = dt
+
+        nb_steps_for_physicx = -1
+
+        while dt_for_physicx > 0.0:
+            next_dt_for_physicx = dt_for_physicx
+
+            # for ball in self.balls:
+            #     for point_on_ball, segment_q in zip(ball.points_on_ball, ball.segments_q):
+            #         if segment_q:
+            #             l_raycast = (segment_q.point - point_on_ball).length
+            #             l_vp = (ball.velocity * dt_for_physicx).length
+            #             over_the_contact_point = l_raycast < l_vp
+            #             if over_the_contact_point:
+            #                 ratio_on_dt = (l_raycast / l_vp) * dt_for_physicx
+            #                 next_dt_for_physicx = min(next_dt_for_physicx, ratio_on_dt)
+
+            # next_dt_for_physicx min dt to used
+            self.space.step(next_dt_for_physicx)
+
+            dt_for_physicx -= next_dt_for_physicx
+            nb_steps_for_physicx += 1
