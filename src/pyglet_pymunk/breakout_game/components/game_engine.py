@@ -192,15 +192,15 @@ class GameEngine:
         while dt_for_physicx > 0.0:
             next_dt_for_physicx = dt_for_physicx
 
-            # for ball in self.balls:
-            #     for point_on_ball, segment_q in zip(ball.points_on_ball, ball.segments_q):
-            #         if segment_q:
-            #             l_raycast = (segment_q.point - point_on_ball).length
-            #             l_vp = (ball.velocity * dt_for_physicx).length
-            #             over_the_contact_point = l_raycast < l_vp
-            #             if over_the_contact_point:
-            #                 ratio_on_dt = (l_raycast / l_vp) * dt_for_physicx
-            #                 next_dt_for_physicx = min(next_dt_for_physicx, ratio_on_dt)
+            for ball in self.balls:
+                for point_on_ball, segment_q in zip(ball.points_on_ball, ball.segments_q):
+                    if segment_q:
+                        l_raycast = (segment_q.point - point_on_ball).length
+                        l_vp = (ball.velocity * dt_for_physicx).length
+                        over_the_contact_point = l_raycast < l_vp
+                        if over_the_contact_point:
+                            ratio_on_dt = (l_raycast / l_vp) * dt_for_physicx
+                            next_dt_for_physicx = min(next_dt_for_physicx, ratio_on_dt)
 
             # next_dt_for_physicx min dt to used
             self.space.step(next_dt_for_physicx)

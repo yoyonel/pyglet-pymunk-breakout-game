@@ -31,11 +31,14 @@ class Ball(pymunk.Body):
         :param mass:
         :param paddle:
         """
-        super().__init__(mass=mass, moment=pymunk.inf)
+        self.radius = 16
+
+        inertia = pymunk.moment_for_circle(mass, 0, self.radius, (0, 0))
+        # inertia = pymunk.inf
+
+        super().__init__(mass=mass, moment=inertia)
 
         self.aspect_ratio = aspect_ratio
-
-        self.radius = 16
 
         paddle_height = 16
         paddle_half_height = paddle_height
@@ -47,7 +50,8 @@ class Ball(pymunk.Body):
         self.position = ball_position
 
         shape = pymunk.Circle(self, radius=aspect_ratio.scale_s(self.radius))
-        shape.elasticity = 0.98
+        shape.elasticity = 1.00
+        shape.friction = 1.00
         shape.collision_type = collision_type
         shape.filter = pymunk.ShapeFilter(categories=2 << collision_type)
 
