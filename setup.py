@@ -29,6 +29,11 @@ setup(
     ],
     keywords=[],
     install_requires=[
+        "cocos2d",
+        "euclid",
+        "numpy",
+        "pillow",
+        "PyOpenGL",         # http://pyopengl.sourceforge.net/ctypes/using.html
         "pyglet==1.3.2",
         "pymunk==5.3.2",    # https://stackoverflow.com/questions/45120438/pymunk-drawing-utils-not-working
                             # https://github.com/viblo/pymunk/issues/122
