@@ -2,6 +2,7 @@
 
 """
 import attr
+import _pickle as pickle
 import ctypes
 import itertools
 import numpy as np
@@ -9,6 +10,7 @@ from math import cos as cosf
 from math import sin as sinf
 from math import sqrt
 import pathlib
+
 #
 import OpenGL.GL.shaders
 from OpenGL.GL import *
@@ -49,9 +51,22 @@ class GameWindow(pyglet.window.Window):
         # framerate display
         self.fps = FPSDisplay(self)
 
+        ###########################################################################
+        self.record_filename = f"/tmp/warp#{4}hz#{self.warpmap.w}#{self.warpmap.h}#{self.warpmap.size}.pkl"
+        ###########################################################################
+
     def on_draw(self):
         self.clear()
         self.fps.draw()
+
+        ###########################################################################
+        # Record (dump pickle in file) Warp grid (animation)
+        # # 4 Hz
+        # if not self.fps.count:
+        #     with open(self.record_filename, "ab") as tmp_warp_file:
+        #         pickle.dump(self.warpmap.get_web_crossings(), tmp_warp_file)
+        ###########################################################################
+
         self.warpmap.draw_debug()
 
     def on_key_press(self, symbol, modifiers):
@@ -231,25 +246,24 @@ class WarpMap(object):
         h_warpmap = self.h_warpmap
         w_warpmap = self.w_warpmap
 
-        glColor3f(0, 1, 0)
-        for y in range(1, h_warpmap - 1):
-            yh = y + 1
-            yl = y - 1
-            for x in range(1, w_warpmap - 1):
-                xh = x + 1
-                xl = x - 1
-                for yi in range(yl, yh + 1):
-                    y_norms = abs(yi - y)
-                    for xi in range(xl, xh + 1):
-                        # Toutes les cases adjacentes (croix+diagonale) (hormis la case centrale (x, y))
-                        # 8 cases en tout
-                        if (xi != x) or (yi != y):
-                            pyglet.graphics.draw(2, GL_LINES,
-                                                 ('v2f', (offset[x][y]['x'],
-                                                          offset[x][y]['y'],
-                                                          offset[xi][yi]['x'],
-                                                          offset[xi][yi]['y'],
-                                                          )))
+        # glColor3f(0, 1, 0)
+        # for y in range(1, h_warpmap - 1):
+        #     yh = y + 1
+        #     yl = y - 1
+        #     for x in range(1, w_warpmap - 1):
+        #         xh = x + 1
+        #         xl = x - 1
+        #         for yi in range(yl, yh + 1):
+        #             for xi in range(xl, xh + 1):
+        #                 # Toutes les cases adjacentes (croix+diagonale) (hormis la case centrale (x, y))
+        #                 # 8 cases en tout
+        #                 if (xi != x) or (yi != y):
+        #                     pyglet.graphics.draw(2, GL_LINES,
+        #                                          ('v2f', (offset[x][y]['x'],
+        #                                                   offset[x][y]['y'],
+        #                                                   offset[xi][yi]['x'],
+        #                                                   offset[xi][yi]['y'],
+        #                                                   )))
 
         # static attach points
         glColor3f(1, 0, 1)
@@ -261,7 +275,7 @@ class WarpMap(object):
 
 
 @attr.s
-class WarpMap_PyMunk(object):
+class WarpMapPyMunk(object):
     space = attr.ib()
 
     h: int = attr.ib(default=13)
@@ -270,6 +284,8 @@ class WarpMap_PyMunk(object):
     bs = attr.ib(init=False, default=[])
     static_bs = attr.ib(init=False, default=[])
 
+    size: int = attr.ib(default=32)
+
     def __attrs_post_init__(self):
         web_group = 1
 
@@ -277,7 +293,7 @@ class WarpMap_PyMunk(object):
             for x in range(self.w):
                 b = pymunk.Body(1, 1)
                 # b.position = Vec2d(x, y) * Vec2d(23, 19)
-                b.position = Vec2d(x, y) * 32
+                b.position = Vec2d(x, y) * self.size
                 b.velocity_func = self.constant_velocity
 
                 s = pymunk.Circle(b, 15)
@@ -379,40 +395,55 @@ class WarpMap_PyMunk(object):
         # self.vao = StereoDepth()
         self.flag = Flag3D()
 
-    def constant_velocity(self, body: pymunk.Body, gravity, damping, dt):
+    @staticmethod
+    def constant_velocity(body: pymunk.Body, gravity, damping, dt):
         body_velocity_normalized = body.velocity.normalized()
         #
         body.velocity = body_velocity_normalized * 75
 
-    def draw_debug(self):
-        # self.vao._draw_frame()
-        self.flag.update(self.bs)
-        glUseProgram(self.shader)
-        self.flag.draw()
-        glUseProgram(0)
+    def get_web_crossings(self):
+        return [
+            [b.position.x, b.position.y]
+            for b in self.bs
+        ]
+
+    def draw_debug(self,
+                   draw_flag=False,
+                   draw_static_attach_points=False,
+                   draw_web_crossings=True,
+                   draw_web_constraints=False,):
+        if draw_flag:
+            # self.vao._draw_frame()
+            self.flag.update(self.bs)
+            glUseProgram(self.shader)
+            self.flag.draw()
+            glUseProgram(0)
 
         # static attach points
-        glColor3f(1, 0, 1)
-        glPointSize(6)
+        if draw_static_attach_points:
+            glColor3f(1, 0, 1)
+            glPointSize(6)
 
-        a = []
-        for b in self.static_bs:
-            a += [b.position.x, b.position.y]
-            pyglet.graphics.draw(len(a) // 2, GL_POINTS, ('v2f', a))
+            a = []
+            for b in self.static_bs:
+                a += [b.position.x, b.position.y]
+                pyglet.graphics.draw(len(a) // 2, GL_POINTS, ('v2f', a))
 
         # web crossings / bodies
-        glColor3f(.1, .8, .05)
-        a = []
-        for b in self.bs:
-            a += [b.position.x, b.position.y]
-        glPointSize(4)
-        # pyglet.graphics.draw(len(a) // 2, GL_POINTS, ('v2f', a))
+        if draw_web_crossings:
+            glColor3f(.1, .8, .05)
+            a = []
+            for b in self.bs:
+                a += [b.position.x, b.position.y]
+            glPointSize(4)
+            pyglet.graphics.draw(len(a) // 2, GL_POINTS, ('v2f', a))
 
         # web net / constraints
-        a = []
-        for j in self.space.constraints:
-            a += [j.a.position.x, j.a.position.y, j.b.position.x, j.b.position.y]
-        pyglet.graphics.draw(len(a) // 2, GL_LINES, ('v2f', a))
+        if draw_web_constraints:
+            a = []
+            for j in self.space.constraints:
+                a += [j.a.position.x, j.a.position.y, j.b.position.x, j.b.position.y]
+            pyglet.graphics.draw(len(a) // 2, GL_LINES, ('v2f', a))
 
         # # self.cooling_map_sprite.draw()
         #
@@ -438,7 +469,7 @@ def main():
     space = pymunk.Space()
     config = pyglet.gl.Config(sample_buffers=1, samples=2, double_buffer=True)
     window = GameWindow(
-        WarpMap_PyMunk(space, 13, 11),
+        WarpMapPyMunk(space, 13, 11),
         1. / 100.,
         space,
         config=config, caption='Fire - WarpMap', resizable=False, fullscreen=False, vsync=False,
