@@ -67,7 +67,7 @@ class GameWindow(pyglet.window.Window):
         #         pickle.dump(self.warpmap.get_web_crossings(), tmp_warp_file)
         ###########################################################################
 
-        self.warpmap.draw_debug()
+        self.warpmap.draw_debug(draw_flag=True, draw_web_constraints=True)
 
     def on_key_press(self, symbol, modifiers):
         if symbol == key.ESCAPE:
