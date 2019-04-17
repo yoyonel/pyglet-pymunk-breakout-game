@@ -13,9 +13,15 @@ from pyglet_pymunk.breakout_game.components.game_window import GameWindow
 def main():
     original_size = Vec2d(1280, 900)
 
-    config = pyglet.gl.Config(sample_buffers=1, samples=2, double_buffer=True)
+    # TODO: Find a way to test if multisample (AA) is available
+    config = pyglet.gl.Config(
+        sample_buffers=0,   # The number of multisample buffers.
+        samples=0,          # The number of samples per pixel,
+                            # or 0 if there are no multisample
+        double_buffer=True  # Specify the presence of a back-buffer
+                            # for every color buffer.
+    )
 
-    # target_size = Vec2d(800, 600)
     target_size = Vec2d(1280, 900)
     aspect_ratio = AspectRatio(original_size, target_size)
 
